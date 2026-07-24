@@ -131,30 +131,11 @@ Para definir:
 
 ## 🔧 Tecnologías Utilizadas
 
-* .NET 6 / .NET 7+
+* .NET 6 / .NET 9
 * ASP.NET Core Web API
 * Entity Framework Core
 * Swagger (Swashbuckle)
 
----
-
-## 📌 Notas
-
-* El sistema está diseñado para ser escalable
-* Se recomienda implementar:
-
-  * JWT para autenticación
-  * Hash de contraseñas (bcrypt)
-  * Control de intentos de acceso
-
----
-
-## 📈 Futuras Mejoras
-
-* Implementación de refresh tokens
-* Control de permisos a nivel de endpoint
-* Auditoría de acciones de usuario
-* Caché de navegación
 
 ---
 
