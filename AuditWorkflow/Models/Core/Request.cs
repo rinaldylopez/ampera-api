@@ -1,6 +1,7 @@
-﻿using AuditWorkflow.Models.Global;
+using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core
 {
@@ -67,8 +68,14 @@ namespace AuditWorkflow.Models.Core
         /// <summary>
         /// Historial
         /// </summary>
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = ServerClock.Now;
         public int UserCreatedId { get; set; }
+
+        /// <summary>
+        /// Cuándo el cliente envió la documentación a la firma (hora del servidor).
+        /// Se limpia si el cliente cancela el envío antes de revisión.
+        /// </summary>
+        public DateTime? ResponseReceivedAt { get; set; }
 
         /// <summary>
         /// Cuándo la firma dio por recibida y cerrada la solicitud PBC (solo lectura en portal después).

@@ -1,6 +1,7 @@
-﻿using AuditWorkflow.Models.Global;
+using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core
 {
@@ -23,6 +24,6 @@ namespace AuditWorkflow.Models.Core
         /// <summary>
         /// Fecha de asignación
         /// </summary>
-        public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
+        public DateTime AssignedAt { get; set; } = ServerClock.Now;
     }
 }

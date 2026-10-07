@@ -1,6 +1,7 @@
 using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core;
 
@@ -28,5 +29,5 @@ public class RequestPublishApprovalEvent
     [MaxLength(2000)]
     public string? Reason { get; set; }
 
-    public DateTime OccurredAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime OccurredAtUtc { get; set; } = ServerClock.Now;
 }

@@ -1,6 +1,7 @@
 using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core;
 
@@ -36,7 +37,7 @@ public class RequestReminder
     [ForeignKey(nameof(CreatedByUserId))]
     public virtual User CreatedBy { get; set; }
 
-    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtUtc { get; set; } = ServerClock.Now;
 
     public virtual ICollection<RequestReminderDispatch> Dispatches { get; set; } = new List<RequestReminderDispatch>();
 }

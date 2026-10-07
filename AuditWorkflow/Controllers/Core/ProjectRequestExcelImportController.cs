@@ -312,7 +312,7 @@ public class ProjectRequestExcelImportController(
                             _context, projectId, cancellationToken),
                         FirmContactId = p.FirmContactId,
                         UserCreatedId = actorId.Value,
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = ServerClock.Now,
                         RequestGuid = Guid.NewGuid(),
                         PortalHandoffStatus = (int)RequestPortalHandoff.WithClient
                     };

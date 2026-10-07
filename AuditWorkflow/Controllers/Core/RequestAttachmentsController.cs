@@ -163,7 +163,7 @@ public class RequestAttachmentsController(AppDbContext context, IFileStorageServ
 
         attachment.RequestId = requestId;
         attachment.UploadedById = userId.Value;
-        attachment.UploadedAt = DateTime.UtcNow;
+        attachment.UploadedAt = ServerClock.Now;
         attachment.FileStatus = AttachmentStatus.Pending;
         attachment.Request = null;
         attachment.UploadedBy = null;
@@ -224,7 +224,7 @@ public class RequestAttachmentsController(AppDbContext context, IFileStorageServ
             FileName = displayName,
             FilePath = storageKey,
             UploadedById = userId.Value,
-            UploadedAt = DateTime.UtcNow,
+            UploadedAt = ServerClock.Now,
             FileStatus = AttachmentStatus.Pending,
             RejectionReason = null
         };
@@ -332,7 +332,7 @@ public class RequestAttachmentsController(AppDbContext context, IFileStorageServ
             return BadRequest("No puede eliminar un archivo que la firma ya aceptó o rechazó.");
 
         row.IsDeleted = true;
-        row.DeletedAt = DateTime.UtcNow;
+        row.DeletedAt = ServerClock.Now;
         row.DeletedById = userId;
         RequestHistoryLog.Add(_context, requestId, userId.Value, RequestHistoryLog.ClientFile, $"El cliente eliminó el archivo \"{row.FileName}\".");
         await _context.SaveChangesAsync();

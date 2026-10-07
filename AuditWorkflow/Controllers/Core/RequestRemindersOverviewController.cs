@@ -157,7 +157,7 @@ public class RequestRemindersOverviewController(AppDbContext context) : Controll
 
         await using var ms = new MemoryStream();
         wb.SaveAs(ms);
-        var fileName = $"recordatorios-{fileSlug}-{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+        var fileName = $"recordatorios-{fileSlug}-{ServerClock.Now:yyyyMMdd_HHmm}.xlsx";
         return File(ms.ToArray(), ExcelExportMime, fileName);
     }
 

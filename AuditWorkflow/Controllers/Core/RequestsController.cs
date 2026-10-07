@@ -238,7 +238,7 @@ public class RequestsController(
 
         await using var ms = new MemoryStream();
         wb.SaveAs(ms);
-        var fileName = $"solicitudes-{fileSlug}-{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+        var fileName = $"solicitudes-{fileSlug}-{ServerClock.Now:yyyyMMdd_HHmm}.xlsx";
         return File(ms.ToArray(), RequestExcelExportMime, fileName);
     }
 
@@ -407,7 +407,7 @@ public class RequestsController(
         request.UserCreatedId = userId.Value;
         if (request.RequestGuid == Guid.Empty)
             request.RequestGuid = Guid.NewGuid();
-        request.CreatedAt = DateTime.UtcNow;
+        request.CreatedAt = ServerClock.Now;
         request.PortalHandoffStatus = (int)RequestPortalHandoff.WithClient;
         request.Project = null;
         request.FirmContact = null;
@@ -604,7 +604,7 @@ public class RequestsController(
             return Conflict("Ya existe una solicitud de envío pendiente de aprobación.");
 
         entity.PublishToClientApprovalState = RequestPublishToClientApproval.PendingManagerPartner;
-        entity.PublishApprovalRequestedUtc = DateTime.UtcNow;
+        entity.PublishApprovalRequestedUtc = ServerClock.Now;
         entity.PublishApprovalRequestedByUserId = userId.Value;
 
         RecordPublishApprovalFlowEvent(
@@ -1022,7 +1022,7 @@ public class RequestsController(
             return "Como manager o socio debe usar la vista «Publicación / aprobaciones» (pestaña de publicación) para enviar borradores al cliente; esta acción es sólo para quien debe pedir esa aprobación.";
 
         entity.PublishToClientApprovalState = RequestPublishToClientApproval.PendingManagerPartner;
-        entity.PublishApprovalRequestedUtc = DateTime.UtcNow;
+        entity.PublishApprovalRequestedUtc = ServerClock.Now;
         entity.PublishApprovalRequestedByUserId = userId;
 
         RecordPublishApprovalFlowEvent(
@@ -1806,6 +1806,7 @@ public class RequestsController(
 
         entity.PortalHandoffStatus = (int)RequestPortalHandoff.WithFirm;
         entity.Status = 5;
+        entity.ResponseReceivedAt = ServerClock.Now;
         RequestHistoryLog.Add(_context, id, userId.Value, RequestHistoryLog.Flow, "El cliente envió la documentación a revisión de la firma.");
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -1907,6 +1908,7 @@ public class RequestsController(
 
         entity.PortalHandoffStatus = (int)RequestPortalHandoff.WithClient;
         entity.Status = 2;
+        entity.ResponseReceivedAt = null;
         RequestHistoryLog.Add(_context, id, userId.Value, RequestHistoryLog.Flow,
             "El cliente canceló el envío a la firma para corregir la documentación.");
         await _context.SaveChangesAsync(cancellationToken);
@@ -2159,7 +2161,7 @@ public class RequestsController(
         if (entity.PortalHandoffStatus != (int)RequestPortalHandoff.WithFirm)
             return BadRequest("Solo puede cerrar cuando la solicitud está en revisión por la firma (tras el envío del cliente).");
 
-        entity.ClosedAt = DateTime.UtcNow;
+        entity.ClosedAt = ServerClock.Now;
         entity.ClosedById = userId.Value;
         entity.Status = 4;
         RequestHistoryLog.Add(_context, id, userId.Value, RequestHistoryLog.Closed, "La firma cerró la solicitud como recibida y completa.");

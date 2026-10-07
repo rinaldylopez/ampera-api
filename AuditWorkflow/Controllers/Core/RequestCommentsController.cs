@@ -50,7 +50,7 @@ public class RequestCommentsController(AppDbContext context, IFileStorageService
 
         comment.RequestId = requestId;
         comment.UserId = userId.Value;
-        comment.CreatedAt = DateTime.UtcNow;
+        comment.CreatedAt = ServerClock.Now;
         comment.Request = null;
         comment.User = null;
         _context.RequestComments.Add(comment);

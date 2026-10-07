@@ -1,6 +1,7 @@
-﻿using AuditWorkflow.Models.Global;
+using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core
 {
@@ -15,7 +16,7 @@ namespace AuditWorkflow.Models.Core
         public string Observation { get; set; } // Por qué se rechazó o qué se aprobó
         /// <summary>Si es true, el portal cliente no debe ver esta entrada en el historial general.</summary>
         public bool FirmInternalOnly { get; set; }
-        public DateTime ActionDate { get; set; } = DateTime.UtcNow;
+        public DateTime ActionDate { get; set; } = ServerClock.Now;
         public int ActionById { get; set; } // Usuario que tomó la decisión
         [ForeignKey("ActionById")]
         public virtual User ActionBy { get; set; }

@@ -54,7 +54,7 @@ public class LoginEmailChallengeService(
             throw new InvalidOperationException(EmailNotConfiguredMessage);
         }
 
-        var now = DateTime.UtcNow;
+        var now = ServerClock.Now;
         var pending = await context.LoginEmailChallenges
             .Where(c => c.UserId == user.UserId && c.ExpiresAtUtc > now)
             .ToListAsync(cancellationToken);
@@ -111,7 +111,7 @@ public class LoginEmailChallengeService(
         if (challenge == null)
             return null;
 
-        if (challenge.ExpiresAtUtc < DateTime.UtcNow)
+        if (challenge.ExpiresAtUtc < ServerClock.Now)
             return null;
 
         if (challenge.FailedAttempts >= MaxFailedAttempts)

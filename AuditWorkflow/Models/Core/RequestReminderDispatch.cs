@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core;
 
@@ -16,5 +17,5 @@ public class RequestReminderDispatch
     /// <summary>Día calendario (UTC) en que se envió la notificación.</summary>
     public DateTime NotifyOnDate { get; set; }
 
-    public DateTime DispatchedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime DispatchedAtUtc { get; set; } = ServerClock.Now;
 }

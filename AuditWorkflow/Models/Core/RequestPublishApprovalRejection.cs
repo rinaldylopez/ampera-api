@@ -1,6 +1,7 @@
 using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core;
 
@@ -29,5 +30,5 @@ public class RequestPublishApprovalRejection
     [MaxLength(2000)]
     public string Reason { get; set; } = "";
 
-    public DateTime RejectedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime RejectedAtUtc { get; set; } = ServerClock.Now;
 }

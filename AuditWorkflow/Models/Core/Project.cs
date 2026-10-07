@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using AuditWorkflow.Models.Global;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core
 {
@@ -39,7 +40,7 @@ namespace AuditWorkflow.Models.Core
         [ForeignKey(nameof(ProjectTypeId))]
         public virtual ProjectType? ProjectType { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = ServerClock.Now;
         /// <summary>
         /// Periodo en fechas que durara la auditoria
         /// </summary>

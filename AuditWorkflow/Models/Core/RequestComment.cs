@@ -1,6 +1,7 @@
-﻿using AuditWorkflow.Models.Global;
+using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core
 {
@@ -19,7 +20,7 @@ namespace AuditWorkflow.Models.Core
         [Required]
         public string CommentText { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = ServerClock.Now;
 
         // --- NUEVOS CAMPOS PARA MULTIMEDIA ---
 

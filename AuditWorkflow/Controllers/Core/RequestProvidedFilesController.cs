@@ -170,7 +170,7 @@ public class RequestProvidedFilesController(AppDbContext context, IFileStorageSe
             FileName = displayName,
             FilePath = storageKey,
             UploadedById = userId.Value,
-            UploadedAt = DateTime.UtcNow
+            UploadedAt = ServerClock.Now
         };
         _context.RequestProvidedFiles.Add(entity);
         RequestHistoryLog.Add(_context, requestId, userId.Value, RequestHistoryLog.FirmFile, $"La firma subió el archivo \"{displayName}\".");
@@ -198,7 +198,7 @@ public class RequestProvidedFilesController(AppDbContext context, IFileStorageSe
         if (row == null) return NotFound();
 
         row.IsDeleted = true;
-        row.DeletedAt = DateTime.UtcNow;
+        row.DeletedAt = ServerClock.Now;
         row.DeletedById = userId;
         RequestHistoryLog.Add(_context, requestId, userId.Value, RequestHistoryLog.FirmFile, $"La firma eliminó el archivo \"{row.FileName}\".");
         await _context.SaveChangesAsync();
