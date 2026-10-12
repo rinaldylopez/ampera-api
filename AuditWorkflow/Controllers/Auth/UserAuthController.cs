@@ -15,6 +15,7 @@ namespace AuditWorkflow.Controllers.Auth
     [ApiController]
     public class UserAuthController(
         ILoginEmailChallengeService loginChallengeService,
+        IPasswordResetService passwordResetService,
         AppDbContext context,
         ITokenService tokenService,
         IUserService userService,
@@ -25,6 +26,7 @@ namespace AuditWorkflow.Controllers.Auth
     {
         private readonly AppDbContext _context = context;
         private readonly ILoginEmailChallengeService _loginChallengeService = loginChallengeService;
+        private readonly IPasswordResetService _passwordResetService = passwordResetService;
         private readonly ITokenService _tokenService = tokenService;
         private readonly IUserService _userService = userService;
         private readonly IUserFirmAccessService _firmAccess = firmAccess;
@@ -144,6 +146,40 @@ namespace AuditWorkflow.Controllers.Auth
 
             return OkAuthResponse(userResponse);
         }
+        /// <summary>Valida si un enlace de restablecimiento sigue vigente (sin revelar el usuario).</summary>
+        [AllowAnonymous]
+        [HttpGet("password-reset/validate")]
+        public async Task<IActionResult> ValidatePasswordResetToken(
+            [FromQuery] string token,
+            CancellationToken cancellationToken)
+        {
+            var ok = await _passwordResetService.IsTokenValidAsync(token ?? "", _context, cancellationToken);
+            if (!ok)
+                return BadRequest(new { message = "El enlace no es válido o ha expirado." });
+            return Ok(new { valid = true, expiresInMinutes = PasswordResetService.TokenExpiryMinutes });
+        }
+
+        /// <summary>Define una nueva contraseña con el token del correo (un solo uso).</summary>
+        [AllowAnonymous]
+        [HttpPost("password-reset/complete")]
+        public async Task<IActionResult> CompletePasswordReset(
+            [FromBody] ResetPasswordRequest request,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Trim().Length < 6)
+                return BadRequest(new { message = "La nueva contraseña debe tener al menos 6 caracteres." });
+
+            var ok = await _passwordResetService.CompleteResetAsync(
+                request.Token ?? "",
+                request.NewPassword,
+                _context,
+                cancellationToken);
+            if (!ok)
+                return BadRequest(new { message = "El enlace no es válido o ha expirado." });
+
+            return Ok(new { message = "Contraseña actualizada. Ya puede iniciar sesión." });
+        }
+
         /// <summary>Cambia la contraseña del usuario autenticado (p. ej. tras contraseña provisional).</summary>
         [Authorize]
         [HttpPost("change-password")]
