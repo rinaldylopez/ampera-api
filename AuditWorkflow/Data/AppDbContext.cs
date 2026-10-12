@@ -18,6 +18,7 @@ namespace AuditWorkflow.Data
         public DbSet<UserRefreshToken> UserRefreshTokens { get; set; }
         public DbSet<UserAccess> UserAccess { get; set; }
         public DbSet<LoginEmailChallenge> LoginEmailChallenges { get; set; }
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; }
         public DbSet<Module> Modules { get; set; }
         public DbSet<NavigationItem> NavigationItems { get; set; }
         public DbSet<Profile> Profiles { get; set; }
@@ -418,6 +419,19 @@ namespace AuditWorkflow.Data
                 .HasOne<User>()
                 .WithMany()
                 .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasIndex(t => t.TokenHash)
+                .IsUnique();
+
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasIndex(t => t.UserId);
+
+            modelBuilder.Entity<PasswordResetToken>()
+                .HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

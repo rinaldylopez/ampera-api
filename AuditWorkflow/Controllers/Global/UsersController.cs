@@ -24,6 +24,7 @@ public class UsersController(
     IOptions<EmailSettings> emailSettings,
     IUserFirmAccessService firmAccess,
     IUserCustomerAccessService customerAccess,
+    IPasswordResetService passwordResetService,
     ILogger<UsersController> logger) : ControllerBase
 {
     private readonly AppDbContext _context = context;
@@ -34,6 +35,7 @@ public class UsersController(
     private readonly IFileStorageService _fileStorage = fileStorage;
     private readonly IEmailService _emailService = emailService;
     private readonly EmailSettings _emailSettings = emailSettings.Value ?? new EmailSettings();
+    private readonly IPasswordResetService _passwordResetService = passwordResetService;
     private readonly ILogger<UsersController> _logger = logger;
     private const int ClientPortalProfileId = ClientPortalProfileHelper.ExpectedProfileId;
 
@@ -429,9 +431,66 @@ public class UsersController(
             return BadRequest("Password must be at least 6 characters.");
 
         entity.PasswordHash = EncryptPassword.HashPassword(dto.Password, PasswordSecretSuffix());
+        entity.MustChangePassword = true;
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    /// <summary>
+    /// Envía al usuario un enlace de un solo uso (caduca en 60 min) para definir su contraseña.
+    /// No incluye la contraseña en el correo.
+    /// </summary>
+    [HttpPost("{id:int}/send-password-reset")]
+    public async Task<IActionResult> SendPasswordReset(int id, CancellationToken cancellationToken)
+    {
+        var firmId = User.GetFirmId();
+        var adminId = User.GetUserId();
+        if (firmId is null || adminId is null) return Unauthorized();
+
+        var entity = await TenantQueries.UsersVisibleInActiveFirm(_context, firmId.Value)
+            .FirstOrDefaultAsync(u => u.UserId == id, cancellationToken);
+        if (entity == null) return NotFound();
+        if (!entity.IsActive)
+            return BadRequest("El usuario está inactivo.");
+        if (string.IsNullOrWhiteSpace(entity.Email))
+            return BadRequest("El usuario no tiene correo.");
+
+        var firmName = await _context.Firms.AsNoTracking()
+            .Where(f => f.FirmId == firmId.Value)
+            .Select(f => f.Name)
+            .FirstOrDefaultAsync(cancellationToken) ?? "AMPERA";
+
+        try
+        {
+            await _passwordResetService.SendResetLinkAsync(
+                entity,
+                adminId.Value,
+                firmName,
+                _context,
+                cancellationToken);
+        }
+        catch (InvalidOperationException ex) when (ex.Message == PasswordResetService.EmailNotConfiguredMessage)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { message = "Servicio de correo no configurado." });
+        }
+        catch (InvalidOperationException ex) when (ex.Message == PasswordResetService.CooldownMessage)
+        {
+            return BadRequest(new { message = "Espere unos minutos antes de reenviar el enlace." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error enviando reset de contraseña a UserId {UserId}", id);
+            return StatusCode(StatusCodes.Status502BadGateway,
+                new { message = "No se pudo enviar el correo. Intente de nuevo." });
+        }
+
+        return Ok(new
+        {
+            message = "Se envió el enlace de acceso temporal al correo del usuario.",
+            expiresInMinutes = PasswordResetService.TokenExpiryMinutes
+        });
     }
 
     [HttpGet("{id:int}/profile-photo")]

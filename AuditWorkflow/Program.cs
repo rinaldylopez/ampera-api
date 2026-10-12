@@ -135,6 +135,7 @@ builder.Services.AddScoped<AuthCookieService>();
 builder.Services.AddScoped<IUserFirmAccessService, UserFirmAccessService>();
 builder.Services.AddScoped<IUserCustomerAccessService, UserCustomerAccessService>();
 builder.Services.AddScoped<ILoginEmailChallengeService, LoginEmailChallengeService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 // IIS y algunos hosts no exponen bien la jerarquía: refuerzo desde variables de entorno conocidas.
 builder.Services.PostConfigure<EmailSettings>(opts =>
