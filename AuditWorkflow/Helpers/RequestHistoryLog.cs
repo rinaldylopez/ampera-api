@@ -1,5 +1,6 @@
 using AuditWorkflow.Data;
 using AuditWorkflow.Models.Core;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Helpers;
 
@@ -13,6 +14,7 @@ public static class RequestHistoryLog
     public const string FirmFile = "Archivo de la firma";
     public const string Flow = "Flujo portal";
     public const string Closed = "Cierre";
+    public const string ChangeRequest = "Solicitud de cambio";
 
     public static void Add(
         AppDbContext db,
@@ -26,7 +28,7 @@ public static class RequestHistoryLog
         {
             RequestId = requestId,
             ActionById = userId,
-            ActionDate = DateTime.UtcNow,
+            ActionDate = ServerClock.Now,
             StatusAtMoment = statusAtMoment,
             Observation = observation,
             FirmInternalOnly = firmInternalOnly

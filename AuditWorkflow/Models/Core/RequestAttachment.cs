@@ -1,6 +1,7 @@
-﻿using AuditWorkflow.Models.Global;
+using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core
 {
@@ -19,7 +20,7 @@ namespace AuditWorkflow.Models.Core
         /// <summary>
         /// Datos de trazbilidad
         /// </summary>
-        public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UploadedAt { get; set; } = ServerClock.Now;
         public int UploadedById { get; set; }
         [ForeignKey("UploadedById")]
         public virtual User UploadedBy { get; set; }

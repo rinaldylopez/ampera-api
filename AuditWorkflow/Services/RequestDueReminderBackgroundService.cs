@@ -1,9 +1,14 @@
 using AuditWorkflow.Settings;
 using Microsoft.Extensions.Options;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Services;
 
-/// <summary>Ejecuta el servicio de recordatorios de vencimiento una vez al día (UTC).</summary>
+/// <summary>
+/// Ejecuta una vez al día (hora del servidor):
+/// 1) recordatorios pre-vencimiento (reglas),
+/// 2) recordatorios semanales de solicitudes ya vencidas.
+/// </summary>
 public class RequestDueReminderBackgroundService(
     IServiceProvider serviceProvider,
     IOptions<DueReminderJobSettings> options,
@@ -30,7 +35,7 @@ public class RequestDueReminderBackgroundService(
             : 12;
 
         _logger.LogInformation(
-            "Due reminder background job activo. Hora UTC objetivo: {Hour}, intervalo: {Interval}h.",
+            "Due reminder background job activo. Hora del servidor objetivo: {Hour} (DueReminderJob:RunAtHourUtc), intervalo: {Interval}h.",
             runHour,
             intervalHours);
 
@@ -38,14 +43,13 @@ public class RequestDueReminderBackgroundService(
         {
             try
             {
-                var now = DateTime.UtcNow;
+                var now = ServerClock.Now;
                 var today = DateOnly.FromDateTime(now);
                 if (now.Hour >= runHour && _lastRunDate != today)
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    var service = scope.ServiceProvider.GetRequiredService<IRequestDueReminderService>();
-                    var result = await service.ProcessDueRemindersAsync(today, stoppingToken);
-                    _lastRunDate = today;
+                    var dueService = scope.ServiceProvider.GetRequiredService<IRequestDueReminderService>();
+                    var result = await dueService.ProcessDueRemindersAsync(today, stoppingToken);
                     _logger.LogInformation(
                         "Due reminders procesados para {Date}: evaluadas={Evaluated}, enviadas={Sent}, fuera ventana={Outside}, ya enviadas={Dup}.",
                         result.ProcessedForDate,
@@ -53,6 +57,18 @@ public class RequestDueReminderBackgroundService(
                         result.NotificationsSent,
                         result.SkippedOutsideWindow,
                         result.SkippedAlreadyDispatched);
+
+                    var overdueService = scope.ServiceProvider.GetRequiredService<IRequestOverdueWeeklyReminderService>();
+                    var overdue = await overdueService.ProcessOverdueWeeklyRemindersAsync(today, stoppingToken);
+                    _logger.LogInformation(
+                        "Overdue digest diario para {Date}: vencidas={Found}, correos={Sent}, yaEnviadosHoy={SkipAlready}, sinEmail={SkipEmail}.",
+                        overdue.ProcessedForDate,
+                        overdue.OverdueRequestsFound,
+                        overdue.DigestEmailsSent,
+                        overdue.RecipientsSkippedAlreadySentToday,
+                        overdue.RecipientsSkippedNoEmail);
+
+                    _lastRunDate = today;
                 }
             }
             catch (Exception ex) when (!stoppingToken.IsCancellationRequested)

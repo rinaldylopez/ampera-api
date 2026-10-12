@@ -277,7 +277,7 @@ public class ProjectsController(
         project.ProjectTypeId = newTypeId;
         project.PartnerInChargeId = wantPartner;
         project.DefaultReminderDaysBeforeDue = NormalizeDefaultReminderDays(project.DefaultReminderDaysBeforeDue);
-        project.CreatedAt = DateTime.UtcNow;
+        project.CreatedAt = ServerClock.Now;
 
         _context.Projects.Add(project);
         await _context.SaveChangesAsync(cancellationToken);

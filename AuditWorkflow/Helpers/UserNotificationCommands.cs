@@ -1,5 +1,6 @@
 using AuditWorkflow.Data;
 using AuditWorkflow.Models.Core;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Helpers;
 
@@ -20,7 +21,7 @@ public static class UserNotificationCommands
         if (uidList.Count == 0)
             return;
 
-        var now = DateTime.UtcNow;
+        var now = ServerClock.Now;
         foreach (var uid in uidList)
         {
             db.UserNotifications.Add(new UserNotification

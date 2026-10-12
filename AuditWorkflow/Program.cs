@@ -176,6 +176,7 @@ builder.Services.Configure<DueReminderJobSettings>(builder.Configuration.GetSect
 builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorage"));
 builder.Services.AddSingleton<IFileStorageService, FileStorageService>();
 builder.Services.AddScoped<IRequestDueReminderService, RequestDueReminderService>();
+builder.Services.AddScoped<IRequestOverdueWeeklyReminderService, RequestOverdueWeeklyReminderService>();
 builder.Services.AddHostedService<RequestDueReminderBackgroundService>();
 
 builder.Services.AddSingleton<IRequestCommentsRealtimeNotifier, RequestCommentsRealtimeNotifier>();
@@ -202,6 +203,16 @@ builder.Services.AddCors(o =>
             "http://localhost:5173",
             "https://www.ampera-ampc.com"
         ];
+    }
+
+    // En Development el SPA Vite (http://localhost:5173) debe estar permitido aunque
+    // appsettings.json solo liste dominios de producción.
+    if (builder.Environment.IsDevelopment())
+    {
+        corsOrigins = corsOrigins
+            .Concat(["http://localhost:5173", "https://localhost:5173"])
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 
     o.AddDefaultPolicy(p => p

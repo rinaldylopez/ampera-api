@@ -56,7 +56,7 @@ public class RequestHistoryController(AppDbContext context) : ControllerBase
 
         entry.RequestId = requestId;
         entry.ActionById = userId.Value;
-        entry.ActionDate = DateTime.UtcNow;
+        entry.ActionDate = ServerClock.Now;
         entry.Request = null;
         entry.ActionBy = null;
         _context.RequestHistory.Add(entry);

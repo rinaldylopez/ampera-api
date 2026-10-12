@@ -1,6 +1,7 @@
 using AuditWorkflow.Models.Global;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Models.Core;
 
@@ -41,7 +42,7 @@ public class UserNotification
     [ForeignKey(nameof(RequestId))]
     public virtual Request? Request { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = ServerClock.Now;
 
     public DateTime? ReadAt { get; set; }
 }

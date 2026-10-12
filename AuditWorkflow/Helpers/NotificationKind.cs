@@ -17,4 +17,13 @@ public static class NotificationKind
 
     /** El cliente canceló el envío a revisión de la firma (notificación a personal de la firma). */
     public const byte ClientCancelledSendToFirm = 7;
+
+    /** Recordatorio semanal: solicitud abierta con fecha de vencimiento ya pasada. */
+    public const byte OverdueWeeklyReminder = 8;
+
+    /** El cliente solicitó ampliación de plazo y/o modificación del requerimiento. */
+    public const byte ClientChangeRequestPending = 9;
+
+    /** La firma resolvió (aprobó/rechazó) una solicitud de cambio del cliente. */
+    public const byte ClientChangeRequestResolved = 10;
 }

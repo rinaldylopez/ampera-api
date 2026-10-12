@@ -164,7 +164,7 @@ public class RequestRemindersController(
 
             CreatedByUserId = userId.Value,
 
-            CreatedAtUtc = DateTime.UtcNow
+            CreatedAtUtc = ServerClock.Now
 
         };
 

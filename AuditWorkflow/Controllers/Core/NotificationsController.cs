@@ -75,7 +75,7 @@ public class NotificationsController(AppDbContext context) : ControllerBase
         if (row == null) return NotFound();
         if (row.ReadAt == null)
         {
-            row.ReadAt = DateTime.UtcNow;
+            row.ReadAt = ServerClock.Now;
             await _context.SaveChangesAsync();
         }
 
@@ -89,7 +89,7 @@ public class NotificationsController(AppDbContext context) : ControllerBase
         var userId = User.GetUserId();
         if (firmId is null || userId is null) return Unauthorized();
 
-        var now = DateTime.UtcNow;
+        var now = ServerClock.Now;
         await _context.UserNotifications
             .Where(n => n.UserId == userId.Value && n.FirmId == firmId.Value && n.ReadAt == null)
             .ExecuteUpdateAsync(s => s.SetProperty(n => n.ReadAt, now));

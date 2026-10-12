@@ -13,12 +13,29 @@ public class AuthCookieService(IOptions<AuthCookieSettings> options, IHostEnviro
     public string AccessCookieName => _settings.AccessCookieName;
     public string RefreshCookieName => _settings.RefreshCookieName;
 
+    /// <summary>
+    /// En producción siempre Secure. En Development respeta <see cref="AuthCookieSettings.Secure"/>
+    /// (p. ej. SameSite=None exige Secure=true con front http://5173 → API https://5289).
+    /// </summary>
     public bool UseSecureCookies => _environment.IsProduction() || _settings.Secure;
+
+    /// <summary>
+    /// Cross-origin local (http SPA → https API) necesita SameSite=None; Lax no envía la cookie en fetch.
+    /// </summary>
+    public SameSiteMode EffectiveSameSite
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_settings.SameSite))
+                return ParseSameSite(_settings.SameSite);
+            return _environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Lax;
+        }
+    }
 
     public void SetAuthCookies(HttpResponse response, string accessToken, string refreshToken, int accessMinutes)
     {
-        var sameSite = ParseSameSite(_settings.SameSite);
-        var secure = UseSecureCookies;
+        var sameSite = EffectiveSameSite;
+        var secure = sameSite == SameSiteMode.None || UseSecureCookies;
         var accessMaxAge = Math.Max(60, accessMinutes * 60);
 
         response.Cookies.Append(
@@ -48,8 +65,8 @@ public class AuthCookieService(IOptions<AuthCookieSettings> options, IHostEnviro
 
     public void ClearAuthCookies(HttpResponse response)
     {
-        var sameSite = ParseSameSite(_settings.SameSite);
-        var secure = UseSecureCookies;
+        var sameSite = EffectiveSameSite;
+        var secure = sameSite == SameSiteMode.None || UseSecureCookies;
 
         response.Cookies.Delete(_settings.AccessCookieName, new CookieOptions
         {

@@ -1,5 +1,6 @@
 using AuditWorkflow.Data;
 using AuditWorkflow.Models.Core;
+using AuditWorkflow.Helpers;
 
 namespace AuditWorkflow.Helpers;
 
@@ -20,7 +21,7 @@ public static class RequestPublishApprovalEventLog
             ActorUserId = actorUserId,
             RelatedUserId = relatedUserId,
             Reason = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim(),
-            OccurredAtUtc = DateTime.UtcNow
+            OccurredAtUtc = ServerClock.Now
         });
     }
 }

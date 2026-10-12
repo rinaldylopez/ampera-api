@@ -487,6 +487,9 @@ namespace AuditWorkflow.Migrations
                     b.Property<int>("RequestNumber")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("ResponseReceivedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -861,6 +864,88 @@ namespace AuditWorkflow.Migrations
                         .IsUnique();
 
                     b.ToTable("RequestReminderDispatches", (string)null);
+                });
+
+            modelBuilder.Entity("AuditWorkflow.Models.Core.RequestOverdueReminderDispatch", b =>
+                {
+                    b.Property<int>("RequestOverdueReminderDispatchId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequestOverdueReminderDispatchId"));
+
+                    b.Property<DateTime>("DispatchedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("NotifyOnDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RequestOverdueReminderDispatchId");
+
+                    b.HasIndex("UserId", "NotifyOnDate")
+                        .IsUnique();
+
+                    b.ToTable("RequestOverdueReminderDispatches", (string)null);
+                });
+
+            modelBuilder.Entity("AuditWorkflow.Models.Core.RequestChangeRequest", b =>
+                {
+                    b.Property<int>("RequestChangeRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequestChangeRequestId"));
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PreviousDueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ProposedDueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RequestedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ReviewedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("RequestChangeRequestId");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("RequestedByUserId");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("RequestId", "Status");
+
+                    b.ToTable("RequestChangeRequests", (string)null);
                 });
 
             modelBuilder.Entity("AuditWorkflow.Models.Core.Team", b =>
@@ -1716,6 +1801,43 @@ namespace AuditWorkflow.Migrations
                         .IsRequired();
 
                     b.Navigation("RequestReminder");
+                });
+
+            modelBuilder.Entity("AuditWorkflow.Models.Core.RequestOverdueReminderDispatch", b =>
+                {
+                    b.HasOne("AuditWorkflow.Models.Global.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AuditWorkflow.Models.Core.RequestChangeRequest", b =>
+                {
+                    b.HasOne("AuditWorkflow.Models.Core.Request", "Request")
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AuditWorkflow.Models.Global.User", "RequestedBy")
+                        .WithMany()
+                        .HasForeignKey("RequestedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AuditWorkflow.Models.Global.User", "ReviewedBy")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Request");
+
+                    b.Navigation("RequestedBy");
+
+                    b.Navigation("ReviewedBy");
                 });
 
             modelBuilder.Entity("AuditWorkflow.Models.Core.Team", b =>

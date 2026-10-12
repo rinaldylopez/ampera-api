@@ -227,7 +227,7 @@ public class TeamsController(
             TeamId = teamId,
             UserId = input.UserId,
             IsLeader = input.IsLeader,
-            AssignedAt = DateTime.UtcNow
+            AssignedAt = ServerClock.Now
         };
         _context.TeamMembers.Add(member);
         try

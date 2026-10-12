@@ -23,7 +23,7 @@ public class RequestDueReminderService(
         DateOnly? asOfDateUtc = null,
         CancellationToken cancellationToken = default)
     {
-        var today = asOfDateUtc ?? DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = asOfDateUtc ?? DateOnly.FromDateTime(ServerClock.Now);
         var todayStart = today.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 
         var rules = await _context.RequestReminders
@@ -158,7 +158,7 @@ public class RequestDueReminderService(
             {
                 RequestReminderId = rule.RequestReminderId,
                 NotifyOnDate = todayStart,
-                DispatchedAtUtc = DateTime.UtcNow
+                DispatchedAtUtc = ServerClock.Now
             });
 
             await _context.SaveChangesAsync(cancellationToken);

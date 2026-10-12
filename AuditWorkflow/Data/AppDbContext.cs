@@ -56,6 +56,8 @@ namespace AuditWorkflow.Data
         public DbSet<RequestPublishApprovalEvent> RequestPublishApprovalEvents { get; set; }
         public DbSet<RequestReminder> RequestReminders { get; set; }
         public DbSet<RequestReminderDispatch> RequestReminderDispatches { get; set; }
+        public DbSet<RequestOverdueReminderDispatch> RequestOverdueReminderDispatches { get; set; }
+        public DbSet<RequestChangeRequest> RequestChangeRequests { get; set; }
         public DbSet<UserNotification> UserNotifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -268,6 +270,40 @@ namespace AuditWorkflow.Data
                 .WithMany(r => r.Dispatches)
                 .HasForeignKey(d => d.RequestReminderId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RequestOverdueReminderDispatch>()
+                .HasIndex(d => new { d.UserId, d.NotifyOnDate })
+                .IsUnique();
+
+            modelBuilder.Entity<RequestOverdueReminderDispatch>()
+                .HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RequestChangeRequest>()
+                .HasIndex(c => c.RequestId);
+
+            modelBuilder.Entity<RequestChangeRequest>()
+                .HasIndex(c => new { c.RequestId, c.Status });
+
+            modelBuilder.Entity<RequestChangeRequest>()
+                .HasOne(c => c.Request)
+                .WithMany()
+                .HasForeignKey(c => c.RequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RequestChangeRequest>()
+                .HasOne(c => c.RequestedBy)
+                .WithMany()
+                .HasForeignKey(c => c.RequestedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RequestChangeRequest>()
+                .HasOne(c => c.ReviewedBy)
+                .WithMany()
+                .HasForeignKey(c => c.ReviewedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<ProfileItem>()
                 .HasIndex(pi => new { pi.ProfileId, pi.NavigationItemId })
